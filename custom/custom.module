@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function custom_menu() {
+	$items = array();
+	$items ['custom/node_json'] = array (
+			'title' => 'Node Represent JSON string',
+			'description' => 'Node Represent JSON string',
+			'page callback' => 'custom_node_json',
+			'access callback' => TRUE
+	);
+	return $items;
+}
+
+/**
+ * system_site_information_settings Form Alter
+ */
+function custom_form_system_site_information_settings_alter(&$form, $form_state) {
+	$form['site_information']['siteapikey'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Site API Key'),
+		'#required' => true,
+		'#default_value' => variable_get('siteapikey', 'No API Key yet'),
+	);
+	$form['actions']['submit']['#value'] = t('Update Configuration');
+	$form['#submit'][] = 'set_message_for_site_api_key';
+}
+
+/**
+ * Custom Form Alter
+ */
+/*function custom_form_alter(&$form, $form_state, $form_id) {
+	if($form_id == 'system_site_information_settings') {
+		$form['site_information']['siteapikey'] = array(
+			'#type' => 'textfield',
+			'#title' => t('Site API Key'),
+			'#required' => true,
+			'#default_value' => variable_get('siteapikey', 'No API Key yet'),
+		);	
+		$form['#submit'][] = 'set_message_for_site_api_key';
+	}
+}*/
+
+function set_message_for_site_api_key($form, $form_state) {
+	if(!empty( $form_state['values']['siteapikey'])) {
+		drupal_set_message('Site API Key has been saved as value: '.variable_get('siteapikey'));
+	}
+}
+
+function _debug($data, $exit = TRUE) {
+	echo "<pre>";
+	print_r($data);
+	echo "</pre>";
+	if($exit)
+		exit();
+}
+
+function custom_node_json(){
+	$siteapikey = variable_get('siteapikey');
+	if(!empty($siteapikey) && $siteapikey != 'No API Key yet'){
+		$type = "page";
+		$nodes = node_load_multiple(array(), array('type' => $type, 'nid' => $siteapikey));
+		if(!empty($nodes)) {
+			echo json_encode($nodes);
+		} else {
+			echo json_encode(array('message' => 'access denied'));
+		}
+	} else {
+		echo json_encode(array('message' => 'access denied'));
+	}
+	die;
+}
+?>

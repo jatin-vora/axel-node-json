@@ -1,0 +1,5 @@
+name = Custom Module
+description = In this module there is all custom hook alteration
+core = 7.x
+package = "Custom"
+version = "7.x-3.0"
